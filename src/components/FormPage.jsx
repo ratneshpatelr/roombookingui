@@ -1,9 +1,13 @@
 // src/components/FormPage.js
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const FormPage = () => {
-  const [formData, setFormData] = useState({
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Initialize formData with passed state or default values
+  const initialFormData = location.state?.formData || {
     propertyName: '',
     locationCity: '',
     locationCountry: '',
@@ -16,15 +20,24 @@ const FormPage = () => {
     description: '',
     extraServices: [],
     images: []
-  });
+  };
 
-  const navigate = useNavigate();
+  const [formData, setFormData] = useState(initialFormData);
 
+  // Update formData if state is passed from navigation
+  useEffect(() => {
+    if (location.state?.formData) {
+      setFormData(location.state.formData);
+    }
+  }, [location.state]);
+
+  // Handler for text, number, and select inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  // Handler for checkbox inputs (Extra Services)
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;
     setFormData(prevState => ({
@@ -35,6 +48,7 @@ const FormPage = () => {
     }));
   };
 
+  // Handler for image uploads
   const handleImageChange = (e) => {
     if (e.target.files.length > 3) {
       alert("You can only upload up to 3 images.");
@@ -43,6 +57,7 @@ const FormPage = () => {
     setFormData({ ...formData, images: Array.from(e.target.files) });
   };
 
+  // Form submission handler
   const handleSubmit = (e) => {
     e.preventDefault();
     navigate('/summary', { state: { formData } });
@@ -50,13 +65,11 @@ const FormPage = () => {
 
   return (
     <div className="p-4 flex flex-col items-center">
-
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-4xl space-y border-opacity-50 rounded-2xl shadow-inset p-4 bg-slate-50"
-        style={{ borderWidth: '0.5px' }}
+        className="w-full max-w-4xl space-y-6 border border-gray-300 rounded-2xl shadow-md p-6 bg-white"
       >
-        <h1 className='text-gray-500 font-bold text-center text-3xl uppercase'>Property Details</h1>
+        <h1 className='text-gray-700 font-bold text-center text-3xl uppercase'>Property Details</h1>
 
         {/* Property Name */}
         <div>
@@ -66,13 +79,13 @@ const FormPage = () => {
             name="propertyName"
             value={formData.propertyName}
             onChange={handleChange}
-            className="border-black border rounded-2xl p-2 w-full"
+            className="border border-gray-400 rounded p-2 w-full"
             required
           />
         </div>
 
         {/* Location */}
-        <div className="flex gap-4 mb-4">
+        <div className="flex gap-4">
           <div className="w-1/2">
             <label className="block font-bold mb-1">City</label>
             <input
@@ -80,7 +93,7 @@ const FormPage = () => {
               name="locationCity"
               value={formData.locationCity}
               onChange={handleChange}
-              className="border-black border rounded-2xl p-2 w-full"
+              className="border border-gray-400 rounded p-2 w-full"
               required
             />
           </div>
@@ -91,14 +104,14 @@ const FormPage = () => {
               name="locationCountry"
               value={formData.locationCountry}
               onChange={handleChange}
-              className="border-black border rounded-2xl p-2 w-full"
+              className="border border-gray-400 rounded p-2 w-full"
               required
             />
           </div>
         </div>
 
         {/* People Count, Bedroom Count, Bathroom Count */}
-        <div className="flex gap-4 mb-4">
+        <div className="flex gap-4">
           <div className="w-1/3">
             <label className="block font-bold mb-1">People Count</label>
             <input
@@ -106,8 +119,9 @@ const FormPage = () => {
               name="peopleCount"
               value={formData.peopleCount}
               onChange={handleChange}
-              className="border-black border rounded-2xl p-2 w-full"
+              className="border border-gray-400 rounded p-2 w-full"
               required
+              min="1"
             />
           </div>
           <div className="w-1/3">
@@ -117,8 +131,9 @@ const FormPage = () => {
               name="bedroomCount"
               value={formData.bedroomCount}
               onChange={handleChange}
-              className="border-black border rounded-2xl p-2 w-full"
+              className="border border-gray-400 rounded p-2 w-full"
               required
+              min="0"
             />
           </div>
           <div className="w-1/3">
@@ -128,22 +143,25 @@ const FormPage = () => {
               name="bathroomCount"
               value={formData.bathroomCount}
               onChange={handleChange}
-              className="border-black border rounded-2xl p-2 w-full"
+              className="border border-gray-400 rounded p-2 w-full"
               required
+              min="0"
             />
           </div>
         </div>
 
         {/* Price Per Night */}
         <div>
-          <label className="block font-bold mb-1">Price Per Night</label>
+          <label className="block font-bold mb-1">Price Per Night ($)</label>
           <input
             type="number"
             name="pricePerNight"
             value={formData.pricePerNight}
             onChange={handleChange}
-            className="border-black border rounded-2xl p-2 w-full"
+            className="border border-gray-400 rounded p-2 w-full"
             required
+            min="0"
+            step="0.01"
           />
         </div>
 
@@ -154,13 +172,13 @@ const FormPage = () => {
             name="view"
             value={formData.view}
             onChange={handleChange}
-            className="border-black border rounded-2xl p-2 w-full"
+            className="border border-gray-400 rounded p-2 w-full"
             required
           >
             <option value="">Select View</option>
-            <option value="sea">Sea</option>
-            <option value="mountain">Mountain</option>
-            <option value="city">City</option>
+            <option value="Sea">Sea</option>
+            <option value="Mountain">Mountain</option>
+            <option value="City">City</option>
           </select>
         </div>
 
@@ -172,7 +190,7 @@ const FormPage = () => {
             name="propertyType"
             value={formData.propertyType}
             onChange={handleChange}
-            className="border-black border rounded-2xl p-2 w-full"
+            className="border border-gray-400 rounded p-2 w-full"
             required
           />
         </div>
@@ -184,7 +202,8 @@ const FormPage = () => {
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="border-black border rounded-2xl p-2 w-full"
+            className="border border-gray-400 rounded p-2 w-full"
+            rows="5"
             required
           ></textarea>
         </div>
@@ -198,7 +217,7 @@ const FormPage = () => {
             accept="image/*"
             multiple
             onChange={handleImageChange}
-            className="border-black border rounded-2xl p-2 w-full"
+            className="border border-gray-400 rounded p-2 w-full"
           />
           {formData.images.length > 0 && (
             <div className="mt-2">
@@ -218,7 +237,7 @@ const FormPage = () => {
         </div>
 
         {/* Extra Services */}
-        <div className="bg-gray-100 p-4 rounded" style={{ width: '70%', maxWidth: '400px', height: '300px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="bg-gray-100 p-4 rounded">
           <label className="block font-bold mb-2">Extra Services</label>
           <div className="flex flex-col gap-2">
             {['Free WiFi', 'Free Cold Air Conditioning', 'Air Conditioning', 'Free Room Cleaning'].map(service => (
@@ -239,8 +258,7 @@ const FormPage = () => {
         <div className="flex justify-center mt-4">
           <button
             type="submit"
-            className="bg-blue-500 text-white p-2 rounded-2xl"
-            style={{ width: '70%' }}
+            className="bg-blue-500 text-white p-2 rounded-2xl w-3/4"
           >
             Submit
           </button>
